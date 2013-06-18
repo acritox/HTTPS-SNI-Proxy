@@ -28,6 +28,11 @@
 #include <signal.h>
 #include <string.h> /* memset() */
 #include <errno.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <resolv.h>
+#include <netdb.h>
 #include "server.h"
 #include "connection.h"
 
@@ -50,6 +55,26 @@ init_server(struct Config *c) {
     signal(SIGPIPE, SIG_IGN);
 
     init_tables(&config->tables);
+
+    if(config->nameserver) {
+        res_init();
+
+        unsigned char buf[1024];
+        res_search("localhost", C_IN, T_A, buf, sizeof(buf));
+
+        struct in_addr server;
+        if (inet_pton(AF_INET, config->nameserver, &server) > 0) {
+            struct sockaddr_in serverSock;
+            serverSock.sin_family = AF_INET;
+            serverSock.sin_port = htons(53);
+            serverSock.sin_addr = server;
+            _res.nscount = 1;
+            _res.nsaddr_list[0] = serverSock;
+        } else {
+            printf("invalid nameserver: %s\n", config->nameserver);
+            return;
+        }
+    }
 
     return init_listeners(&config->listeners, &config->tables);
 }

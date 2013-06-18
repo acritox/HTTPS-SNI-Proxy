@@ -14,4 +14,4 @@ sni_proxy_SOURCES = sni_proxy.c \
 					buffer.c \
 					tls.c \
 					http.c
-sni_proxy_LDADD = -lpcre
+sni_proxy_LDADD = -lpcre -lresolv

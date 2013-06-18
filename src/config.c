@@ -31,6 +31,7 @@
 
 
 static int accept_username(struct Config *, char *);
+static int accept_nameserver(struct Config *, char *);
 static int end_listener_stanza(struct Config *, struct Listener *);
 static int end_table_stanza(struct Config *, struct Table *);
 static int end_backend(struct Table *, struct Backend *);
@@ -74,6 +75,11 @@ static struct Keyword global_grammar[] = {
             (int(*)(void *, char *))accept_table_arg,
             table_stanza_grammar,
             (int(*)(void *, void *))end_table_stanza},
+    { "nameserver",
+            NULL,
+            (int(*)(void *, char *))accept_nameserver,
+            NULL,
+            NULL},
     { NULL, NULL, NULL, NULL, NULL }
 };
 
@@ -187,6 +193,16 @@ accept_username(struct Config *config, char *username) {
         return 1;
 }
 
+static int
+accept_nameserver(struct Config *config, char *nameserver) {
+        config->nameserver = strdup(nameserver);
+        if (config->nameserver == NULL) {
+            perror("malloc:");
+            return -1;
+        }
+
+        return 1;
+}
 
 static int
 end_listener_stanza(struct Config *config, struct Listener *listener) {
