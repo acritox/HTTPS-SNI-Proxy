@@ -136,7 +136,6 @@ init_config(const char *filename) {
 
 void
 free_config(struct Config *config) {
-
     if (config->filename)
         free(config->filename);
     if (config->user)
